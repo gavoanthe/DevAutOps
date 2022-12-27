@@ -14,25 +14,24 @@ type Usuario struct {
 }
 
 // var templates = template.Must(template.New("T").ParseGlob("templates/*.html"))
-var templates = template.Must(template.New("T").ParseGlob("templates/**/*.html"))
+var templates = template.Must(template.New("T").ParseGlob("../templates/**/*.html"))
+
+func renderTemplate(rw http.ResponseWriter, name string, data interface{}) {
+	err := templates.ExecuteTemplate(rw, name, data)
+
+	if err != nil {
+		http.Error(rw, "Ocurrio un error", http.StatusInternalServerError)
+	}
+}
 
 // Handlers
 func Index(rw http.ResponseWriter, r *http.Request) {
 	usuario := Usuario{"Alex", 26}
-	err := templates.ExecuteTemplate(rw, "index.html", usuario)
-
-	if err != nil {
-		panic(err)
-	}
+	renderTemplate(rw, "index.html", usuario)
 }
 
 func Registro(rw http.ResponseWriter, r *http.Request) {
-	//usuario := Usuario{"Alex", 26}
-	err := templates.ExecuteTemplate(rw, "registro.html", nil)
-
-	if err != nil {
-		panic(err)
-	}
+	renderTemplate(rw, "registro.html", nil)
 }
 
 // Función principal
