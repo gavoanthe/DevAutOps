@@ -15,12 +15,21 @@ type Usuario struct {
 
 // var templates = template.Must(template.New("T").ParseGlob("templates/*.html"))
 var templates = template.Must(template.New("T").ParseGlob("../templates/**/*.html"))
+var errorTemplate = template.Must(template.ParseFiles("../templates/error/error.html"))
 
+// Funcion Handler Error
+
+func HandlerError(rw http.ResponseWriter, status int) {
+	rw.WriteHeader(status)
+	errorTemplate.Execute(rw, nil)
+}
+
+// Funcion para renderizar templates
 func renderTemplate(rw http.ResponseWriter, name string, data interface{}) {
 	err := templates.ExecuteTemplate(rw, name, data)
 
 	if err != nil {
-		http.Error(rw, "Ocurrio un error", http.StatusInternalServerError)
+		HandlerError(rw, http.StatusInternalServerError)
 	}
 }
 
@@ -36,11 +45,16 @@ func Registro(rw http.ResponseWriter, r *http.Request) {
 
 // Función principal
 func main() {
+	// Archivos Estaticos
+	staticFile := http.FileServer(http.Dir("static"))
 
 	//Mux
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", Index)
 	mux.HandleFunc("/registro", Registro)
+
+	// mux static File
+	mux.Handle("/static/", http.StripPrefix("/static/", staticFile))
 
 	//Server
 	server := &http.Server{
